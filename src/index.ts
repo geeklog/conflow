@@ -1,9 +1,11 @@
+import { timeStamp } from "console";
+
 type Func = () => any;
 
 interface Options {
   onErrorOccur?: 'skip' | 'break';
   suppressError?: boolean;
-  preserveOrder: boolean;
+  preserveOrder?: boolean;
 }
 
 type OnOneDone = (r: any, success: number, fail: number, total: number) => void;
@@ -15,7 +17,8 @@ export class Concurrent {
   private success = 0;
   private fail = 0;
   private total = 0;
-  private exeQueue: Func[] = [];
+  private waitingQueue: Array<[Func, number]> = [];
+  private execQueue: string[] = [];
   private resultQueue: any[] = [];
   private runningCount = 0;
   private limit: number = 0;
@@ -34,8 +37,9 @@ export class Concurrent {
   }
 
   go(fn: Func) {
+    this.waitingQueue.push([fn, this.total]);
+    this.execQueue[this.total] = 'wait';
     this.total ++;
-    this.exeQueue.push(fn);
     this.next();
   }
 
@@ -59,15 +63,16 @@ export class Concurrent {
       return;
     }
     while (this.runningCount < this.limit) {
-      const fn = this.exeQueue.shift();
-      if (!fn) {
+      const exec = this.waitingQueue.shift();
+      if (!exec) {
         break;
       }
-      this.call(fn);
+      const [fn, i] = exec;
+      this.call(fn, i);
     }
   }
 
-  private async call(fn: Func) {
+  private async call(fn: Func, curr: number) {
     if (this.halt) {
       return;
     }
@@ -75,11 +80,39 @@ export class Concurrent {
     this.runningCount++;
 
     try {
-      const r = await fn();
-      this.success ++;
-      this.onOneDone && this.onOneDone(r, this.success, this.fail, this.total);
+      this.execQueue[curr] = 'running';
+      const currResult = await fn();
+      this.execQueue[curr] = 'done';
+      if (this.preserveOrder) {
+        this.resultQueue[curr] = currResult;
+        let waitingPrevious = false;
+        for (let i = 0; i < curr; i++) {
+          if (this.execQueue[i] === 'running') {
+            waitingPrevious = true;
+            break;
+          }
+        }
+        // console.log('exe', curr, this.execQueue, 'waitingPrevious=' + waitingPrevious);
+        if (!waitingPrevious) {
+          for (let i = curr; i < this.total; i++) {
+            if (this.execQueue[i] === 'running') {
+              break;
+            }
+            const r = this.resultQueue[i];
+            if (this.execQueue[i] === 'done' && (r !== undefined)) {
+              this.resultQueue[i] = undefined;
+              this.success ++;
+              this.onOneDone && this.onOneDone(r, this.success, this.fail, this.total);
+            }
+          }
+        }
+      } else {
+        this.success ++;
+        this.onOneDone && this.onOneDone(currResult, this.success, this.fail, this.total);
+      }
     } catch (error) {
       this.fail ++;
+      this.execQueue[curr] = 'fail';
       if (this.onError) {
         this.onError(error, this.success, this.fail, this.total);
       } else if (!this.supressError) {
@@ -97,7 +130,7 @@ export class Concurrent {
       return;
     }
 
-    if (this.exeQueue.length === 0) {
+    if (this.waitingQueue.length === 0) {
       this.onAllDone && this.onAllDone(this.success, this.fail, this.total);
     } else {
       this.next();
