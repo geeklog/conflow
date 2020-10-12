@@ -26,7 +26,8 @@
     "no-bitwise": false,
     "forin": false,
     "no-unused-expression": false,
-    "no-conditional-assignment": false
+    "no-conditional-assignment": false,
+    "max-classes-per-file": false
   },
   "rulesDirectory": []
 }

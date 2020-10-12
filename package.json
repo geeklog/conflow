@@ -1,9 +1,8 @@
 {
   "name": "concurr",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "concurrent control",
   "main": "index.js",
-  "type": "index.d.ts",
   "scripts": {
     "pub-dev": "pushd . && tsc && cp package.json dist && cp README.md dist && cd dist && npm link || popd",
     "pub": "pushd . && tsc && cp package.json dist && cp README.md dist && cd dist && npm publish || popd",
