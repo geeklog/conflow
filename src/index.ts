@@ -1,5 +1,3 @@
-import { timeStamp } from "console";
-
 type Func = () => any;
 
 interface Options {
