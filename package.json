@@ -1,12 +1,12 @@
 {
   "name": "concurr",
-  "version": "0.0.1",
+  "version": "1.1.0",
   "description": "concurrent control",
   "main": "index.js",
   "type": "index.d.ts",
   "scripts": {
-    "pub-dev": "pushd . && tsc && cp package.json dist && cd dist && npm link || popd",
-    "pub": "pushd . && tsc && cp package.json dist && cd dist && npm publish || popd",
+    "pub-dev": "pushd . && tsc && cp package.json dist && cp README.md dist && cd dist && npm link || popd",
+    "pub": "pushd . && tsc && cp package.json dist && cp README.md dist && cd dist && npm publish || popd",
     "test": "mocha -r ts-node/register **/*.test.ts",
     "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test"
   },

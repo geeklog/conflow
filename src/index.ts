@@ -55,6 +55,14 @@ export class Concurrent {
     this.onError = callback;
   }
 
+  finish(): Promise<{success: number, fail: number, total: number}> {
+    return new Promise((resolve) => {
+      this.done((success: number, fail: number, total: number) =>
+        resolve({success, fail, total})
+      );
+    });
+  }
+
   private async next() {
     if (this.halt) {
       return;
