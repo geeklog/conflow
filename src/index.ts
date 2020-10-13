@@ -178,7 +178,7 @@ export class Concurrent {
       return;
     }
 
-    if (this.waitingQueue.length === 0 && this.runningCount === 0) {
+    if (this.waitingQueue.length === 0 && this.runningCount === 0 && !this.idleHandlers.length) {
       this.onAllDone && this.onAllDone(this.success, this.fail, this.total);
     } else {
       this.next();
