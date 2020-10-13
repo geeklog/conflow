@@ -17,15 +17,29 @@ interface Monitor {
   onDone: OnAllDone;
 }
 
+interface PromiseHandle {
+  resolve: (result?: any) => void;
+  reject: (error: Error) => void;
+}
+
 export type Job = Partial<Monitor> & AnyFunc;
+
+function createPromiseHandle(): [Promise<any>, PromiseHandle] {
+  const handle: PromiseHandle = {} as any;
+  const promise = new Promise((resolve, reject) => {
+    handle.resolve = resolve;
+    handle.reject = reject;
+  });
+  return [promise, handle];
+}
 
 export class Concurrent {
 
   private success = 0;
   private fail = 0;
   private total = 0;
-  private waitingQueue: Array<[Func, number]> = [];
-  private execQueue: string[] = [];
+  private waitingQueue: Array<[Func, number, PromiseHandle]> = [];
+  private execQueue: Array<'wait'|'running'|'fail'|'done'> = [];
   private resultQueue: any[] = [];
   private runningCount = 0;
   private limit: number = 0;
@@ -36,6 +50,7 @@ export class Concurrent {
   private onAllDone ?: OnAllDone;
   private supressError: boolean = false;
   private preserveOrder: boolean = false;
+  private idleHandlers: PromiseHandle[] = [];
 
   constructor(limit: number, options?: Options) {
     this.onErrorOccur = options && options.onErrorOccur || 'skip';
@@ -44,10 +59,12 @@ export class Concurrent {
   }
 
   go(fn: Func) {
-    this.waitingQueue.push([fn, this.total]);
+    const [promise, handle] = createPromiseHandle();
+    this.waitingQueue.push([fn, this.total, handle]);
     this.execQueue[this.total] = 'wait';
     this.total ++;
     this.next();
+    return promise;
   }
 
   one(callback: OnOneDone) {
@@ -60,6 +77,17 @@ export class Concurrent {
 
   error(callback: OnError) {
     this.onError = callback;
+  }
+
+  idle(): Promise<{success: number, fail: number, total: number}> {
+    if (this.runningCount < this.limit) {
+      return Promise.resolve({
+        success: this.success, fail: this.fail, total: this.total
+      });
+    }
+    const [promise, handler] = createPromiseHandle();
+    this.idleHandlers.push(handler);
+    return promise;
   }
 
   finish(): Promise<{success: number, fail: number, total: number}> {
@@ -82,12 +110,17 @@ export class Concurrent {
       if (!exec) {
         break;
       }
-      const [fn, i] = exec;
-      this.call(fn, i);
+      const [fn, i, promise] = exec;
+      this.call(fn, i, promise);
+    }
+    if (this.runningCount < this.limit) {
+      for (const idleHandle of this.idleHandlers) {
+        idleHandle.resolve({success: this.success, fail: this.fail, total: this.total});
+      }
     }
   }
 
-  private async call(fn: Func, curr: number) {
+  private async call(fn: Func, curr: number, promise: PromiseHandle) {
     if (this.halt) {
       return;
     }
@@ -97,6 +130,7 @@ export class Concurrent {
     try {
       this.execQueue[curr] = 'running';
       const currResult = await fn();
+      promise.resolve(currResult);
       this.execQueue[curr] = 'done';
       if (this.preserveOrder) {
         this.resultQueue[curr] = currResult;
@@ -107,7 +141,6 @@ export class Concurrent {
             break;
           }
         }
-        // console.log('exe', curr, this.execQueue, 'waitingPrevious=' + waitingPrevious);
         if (!waitingPrevious) {
           for (let i = curr; i < this.total; i++) {
             if (this.execQueue[i] === 'running') {
@@ -135,8 +168,8 @@ export class Concurrent {
       }
       if (this.onErrorOccur === 'break') {
         this.halt = true;
-        return;
       }
+      promise.reject(error);
     }
 
     this.runningCount--;
@@ -145,7 +178,7 @@ export class Concurrent {
       return;
     }
 
-    if (this.waitingQueue.length === 0) {
+    if (this.waitingQueue.length === 0 && this.runningCount === 0) {
       this.onAllDone && this.onAllDone(this.success, this.fail, this.total);
     } else {
       this.next();

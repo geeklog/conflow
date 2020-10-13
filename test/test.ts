@@ -1,4 +1,4 @@
-import concurr from './index';
+import concurr from '../src/index';
 
 const q = concurr(4, {preserveOrder: true});
 
