@@ -1,6 +1,6 @@
 {
   "name": "concurr",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "concurrent control",
   "main": "index.js",
   "scripts": {

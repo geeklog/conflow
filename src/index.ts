@@ -8,7 +8,7 @@ interface Options {
 }
 
 interface AsyncIterator {
-  next: () => Promise<{value: any, done: boolean}>;
+  next: () => Promise<{value: any, done: boolean}> | {value: any, done: boolean};
 }
 
 type IteratorOrList = AsyncIterator | any[];
