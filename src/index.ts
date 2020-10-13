@@ -7,6 +7,20 @@ interface Options {
   preserveOrder?: boolean;
 }
 
+interface AsyncIterator {
+  next: () => Promise<{value: any, done: boolean}>;
+}
+
+type IteratorOrList = AsyncIterator | any[];
+
+function isIterator(list: IteratorOrList): list is AsyncIterator {
+  if (!!(list as AsyncIterator).next) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 type OnOneDone = (r: any, success: number, fail: number, total: number) => void;
 type OnError = (err: Error, success: number, fail: number, total: number) => void;
 type OnAllDone = (success: number, fail: number, total: number) => void;
@@ -88,6 +102,21 @@ export class Concurrent {
     const [promise, handler] = createPromiseHandle();
     this.idleHandlers.push(handler);
     return promise;
+  }
+
+  async forEach(list: IteratorOrList, fn: (n: any) => void | Promise<void>) {
+    if (isIterator(list)) {
+      let n = await list.next();
+      while (!n.done) {
+        this.go(() => fn(n.value));
+        await this.idle();
+        n = await list.next();
+      }
+    } else {
+      for (const a of list) {
+        this.go(() => fn(a));
+      }
+    }
   }
 
   finish(): Promise<{success: number, fail: number, total: number}> {
@@ -186,6 +215,18 @@ export class Concurrent {
   }
 
 }
+
+export const concurrentAll = (
+  n: number,
+  vals: any[] = [],
+  fn: (item: any) => Promise<any> = async (item: any) => item
+) => {
+  const q = concurrent(n, {preserveOrder: true});
+  for (const v of vals) {
+    q.go(fn.bind(null, v));
+  }
+  return q;
+};
 
 export default function concurrent(limit: number, options?: Options) {
   return new Concurrent(limit, options);
