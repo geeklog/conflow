@@ -15,7 +15,8 @@ function test1() {
   q.go(yieldNumber(3, 4000));
   q.go(yieldNumber(4, 0));
 
-  q.one((n) => console.log('done', n));
+  q.one((n) => console.log('one', n));
+  q.done(() => console.log('done'));
 }
 
 function test2() {
@@ -25,7 +26,7 @@ function test2() {
   q.go(yieldNumber(3, 2000));
   q.go(yieldNumber(4, 1000));
 
-  q.one((n) => console.log('done', n));
+  q.one((n) => console.log('one', n));
 }
 
-test2();
+test1();
