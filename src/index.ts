@@ -107,6 +107,7 @@ export class Concurrent {
   async forEach(list: IteratorOrList, fn: (n: any) => void | Promise<void>) {
     if (isIterator(list)) {
       let n = await list.next();
+      this.go(() => fn(n.value));
       while (!n.done) {
         this.go(() => fn(n.value));
         await this.idle();
