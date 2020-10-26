@@ -1,7 +1,7 @@
 {
-  "name": "concurr",
-  "version": "1.4.4",
-  "description": "concurrent control",
+  "name": "conflow",
+  "version": "1.0.0",
+  "description": "Node.js Control flow",
   "main": "index.js",
   "scripts": {
     "pub-dev": "tsc && pushd . && cp package.json dist && cp README.md dist && cd dist && npm link || popd",
@@ -10,9 +10,9 @@
     "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test"
   },
   "prepublish": "tsc",
-  "keywords": ["concurrent", "flow-control", "async", "await", "queue", "pipeline", "javascript", "typescript"],
-  "repository": "https://github.com/geeklog/concurr.git",
-  "author": "Mikov",
+  "keywords": ["control flow", "concurrent", "sequential", "async", "await", "queue", "pipeline", "javascript", "typescript"],
+  "repository": "https://github.com/geeklog/conflow.git",
+  "author": "Wateriy",
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
