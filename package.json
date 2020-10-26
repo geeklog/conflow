@@ -1,0 +1,29 @@
+{
+  "name": "conflow",
+  "version": "1.0.0",
+  "description": "Node.js Control flow",
+  "main": "index.js",
+  "scripts": {
+    "pub-dev": "tsc && pushd . && cp package.json dist && cp README.md dist && cd dist && npm link || popd",
+    "pub": "tsc && pushd . && cp package.json dist && cp README.md dist && cd dist && npm publish || popd",
+    "test": "mocha -r ts-node/register **/*.test.ts",
+    "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test"
+  },
+  "prepublish": "tsc",
+  "keywords": ["control flow", "concurrent", "sequential", "async", "await", "queue", "pipeline", "javascript", "typescript"],
+  "repository": "https://github.com/geeklog/conflow.git",
+  "author": "Wateriy",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chai": "^4.2.5",
+    "@types/lodash": "^4.14.147",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.12.11",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
+    "ts-node": "^8.5.2",
+    "typescript": "^3.7.2"
+  }
+}
