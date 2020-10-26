@@ -1,3 +1,5 @@
+This package is deprecated, use the [conflow](https://github.com/geeklog/conflow.git) istead.
+
 ## Usage example
 
 ```typescript
