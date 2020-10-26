@@ -1,6 +1,5 @@
 import { Job } from "./types";
-import { Concurrent } from './concurrent';
-import concurrent from './concurrent';
+import { Concurrent, concurrent } from './concurrent';
 
 class PinelineRunner {
 

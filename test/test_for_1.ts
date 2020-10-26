@@ -1,6 +1,4 @@
-import concurr from '../src/index';
-
-const sleep = (millseconds?: number) => new Promise((resolve) => setTimeout(() => resolve(), millseconds));
+import { concurrent, sleep } from '../src/index';
 
 function onlyOne() {
   return {
@@ -14,7 +12,7 @@ function onlyOne() {
 }
 
 async function test() {
-  const q = concurr(3, {preserveOrder: true});
+  const q = concurrent(3, {preserveOrder: true});
   q.forEach(onlyOne(), async n => {
     await sleep(1000);
     console.log(n);

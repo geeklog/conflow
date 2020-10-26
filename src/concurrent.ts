@@ -76,9 +76,9 @@ export class Concurrent {
       let n = await list.next();
       this.go(() => fn(n.value));
       while (!n.done) {
+        n = await list.next();
         this.go(() => fn(n.value));
         await this.idle();
-        n = await list.next();
       }
     } else {
       for (const a of list) {
@@ -184,18 +184,18 @@ export class Concurrent {
 
 }
 
-export const concurrentAll = (
+export function concurrent(limit: number, options?: Options) {
+  return new Concurrent(limit, options);
+}
+
+export function concurrentAll(
   n: number,
   vals: any[] = [],
   fn: (item: any) => Promise<any> = async (item: any) => item
-) => {
+) {
   const q = concurrent(n, {preserveOrder: true});
   for (const v of vals) {
     q.go(fn.bind(null, v));
   }
   return q;
-};
-
-export default function concurrent(limit: number, options?: Options) {
-  return new Concurrent(limit, options);
 }

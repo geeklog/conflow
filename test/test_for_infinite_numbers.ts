@@ -1,24 +1,21 @@
-import concurr from '../src/index';
-
-const sleep = (millseconds?: number) => new Promise((resolve) => setTimeout(() => resolve(), millseconds));
+import { concurrent, sleep } from '../src/index';
 
 function infiniteNumber() {
   let i = 0;
   return {
     async next() {
-      let result: {value: number, done: boolean};
-      result = {
+      i += 1;
+      const result: {value: number, done: boolean} = {
         value: i,
         done: false
       };
-      i += 1;
       return result;
     }
   };
 }
 
 async function test() {
-  const q = concurr(3, {preserveOrder: true});
+  const q = concurrent(3, {preserveOrder: true});
   q.forEach(infiniteNumber(), async n => {
     await sleep(1000);
     console.log(n);

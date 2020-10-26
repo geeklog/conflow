@@ -1,32 +1,15 @@
-import concurr from '../src/index';
+import { concurrent, delay } from '../src/index';
 
-const q = concurr(4, {preserveOrder: true});
+const q = concurrent(4);
 
-const yieldNumber = (n: number, delayMillseconds: number) => () => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(n), delayMillseconds);
-  });
-};
-
-function test1() {
-  q.go(yieldNumber(0, 2000));
-  q.go(yieldNumber(1, 1000));
-  q.go(yieldNumber(2, 3000));
-  q.go(yieldNumber(3, 4000));
-  q.go(yieldNumber(4, 0));
-
-  q.one((n) => console.log('one', n));
-  q.done(() => console.log('done'));
-}
-
-function test2() {
-  q.go(yieldNumber(0, 5000));
-  q.go(yieldNumber(1, 4000));
-  q.go(yieldNumber(2, 3000));
-  q.go(yieldNumber(3, 2000));
-  q.go(yieldNumber(4, 1000));
+function test() {
+  q.go(delay(0, 5000));
+  q.go(delay(1, 4000));
+  q.go(delay(2, 3000));
+  q.go(delay(3, 2000));
+  q.go(delay(4, 1000));
 
   q.one((n) => console.log('one', n));
 }
 
-test1();
+test();

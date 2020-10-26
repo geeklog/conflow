@@ -3,6 +3,7 @@ import { SimpleAyncFunc, AnyFunc } from './types';
 export * from './concurrent';
 export * from './sequential';
 export * from './sleep';
+export * from './delay';
 export * from './pipe';
 export * from './retry';
 export * from './workers';

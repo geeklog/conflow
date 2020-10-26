@@ -1,6 +1,6 @@
-import concurr from '../src/index';
+import { concurrent } from '../src/index';
 
-const q = concurr(10, {preserveOrder: true});
+const q = concurrent(1, {preserveOrder: true});
 
 const yieldNumber = (n: number, delayMillseconds: number) => () => {
   return new Promise((resolve) => {
