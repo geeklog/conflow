@@ -7,11 +7,11 @@ export type Mapper<T> = (a: T) => T;
 
 export type Wait<T> = () => Promise<T>;
 export type Resolve<T> = (result?: T) => void;
-export type Reject = (error: Error) => void;
+export type Reject = (reason?: any) => void;
 
 export interface PromiseHandle<T> {
   resolve: Resolve<T>;
-  reject: Resolve<T>;
+  reject: Reject;
   wait: Wait<T>;
 }
 

@@ -2,7 +2,7 @@ import { PromiseHandle } from './types';
 
 export function usePromise<T>(): PromiseHandle<T> {
   let resolve: ((result?: T) => void);
-  let reject: ((error: Error) => void);
+  let reject: ((reason?: any) => void);
   let wait: () => Promise<T>;
   const p = new Promise<T>((resolveFn, rejectFn) => {
     resolve = resolveFn;
