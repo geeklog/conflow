@@ -8,6 +8,7 @@ export * from './sleep';
 export * from './delay';
 export * from './pipe';
 export * from './retry';
+export * from './synchronized';
 export * from './workers';
 
 export function run(fn: any, ...args: any[]) {

@@ -1,13 +1,18 @@
 export type Func = () => any;
 export type AnyFunc = (...args: any[]) => any;
 export type SimpleAyncFunc = () => Promise<void> | void;
+export type AsyncFunction = (...args: any[]) => Promise<any>;
 export type Filter<T> = (item: T, index?: number) => boolean;
 export type Mapper<T> = (a: T) => T;
 
+export type Wait<T> = () => Promise<T>;
+export type Resolve<T> = (result?: T) => void;
+export type Reject = (error: Error) => void;
+
 export interface PromiseHandle<T> {
-  resolve: (result?: T) => void;
-  reject: (error: Error) => void;
-  wait: () => Promise<T>;
+  resolve: Resolve<T>;
+  reject: Resolve<T>;
+  wait: Wait<T>;
 }
 
 export interface AsyncIterator {
