@@ -1,6 +1,6 @@
 {
   "name": "conflow",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Node.js control flow",
   "main": "index.js",
   "scripts": {
