@@ -1,7 +1,7 @@
 {
   "name": "conflow",
-  "version": "1.1.1",
-  "description": "Node.js Control flow",
+  "version": "1.1.2",
+  "description": "Node.js control flow",
   "main": "index.js",
   "scripts": {
     "pub-dev": "tsc && pushd . && cp package.json dist && cp README.md dist && cd dist && npm link || popd",
