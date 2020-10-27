@@ -4,9 +4,10 @@ export type SimpleAyncFunc = () => Promise<void> | void;
 export type Filter<T> = (item: T, index?: number) => boolean;
 export type Mapper<T> = (a: T) => T;
 
-export interface PromiseHandle {
-  resolve: (result?: any) => void;
+export interface PromiseHandle<T> {
+  resolve: (result?: T) => void;
   reject: (error: Error) => void;
+  wait: () => Promise<T>;
 }
 
 export interface AsyncIterator {
@@ -19,13 +20,13 @@ export type OnOneDone = (r: any, success: number, fail: number, total: number) =
 export type OnError = (err: Error, success: number, fail: number, total: number) => void;
 export type OnAllDone = (success: number, fail: number, total: number) => void;
 
-export interface Monitor {
+export interface ProgressMonitor {
   onProgress: OnOneDone;
   onError: OnError;
   onDone: OnAllDone;
 }
 
-export type Job = Partial<Monitor> & AnyFunc;
+export type Job = Partial<ProgressMonitor> & AnyFunc;
 
 export function isIterator(list: IteratorOrList): list is AsyncIterator {
   if (!!(list as AsyncIterator).next) {
@@ -33,13 +34,4 @@ export function isIterator(list: IteratorOrList): list is AsyncIterator {
   } else {
     return false;
   }
-}
-
-export function createPromiseHandle(): [Promise<any>, PromiseHandle] {
-  const handle: PromiseHandle = {} as any;
-  const promise = new Promise((resolve, reject) => {
-    handle.resolve = resolve;
-    handle.reject = reject;
-  });
-  return [promise, handle];
 }

@@ -92,3 +92,7 @@ export class Pipeline {
   }
 
 }
+
+export function pipeline() {
+  return new Pipeline();
+}

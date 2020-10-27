@@ -1,5 +1,5 @@
+import { usePromise } from './promise';
 import {
-  createPromiseHandle,
   Func,
   isIterator,
   IteratorOrList,
@@ -14,12 +14,18 @@ interface Options {
   preserveOrder?: boolean;
 }
 
+interface ProgressStatus {
+  success: number;
+  fail: number;
+  total: number;
+}
+
 export class Concurrent {
 
   private success = 0;
   private fail = 0;
   private total = 0;
-  private waitingQueue: Array<[Func, number, PromiseHandle]> = [];
+  private waitingQueue: Array<[Func, number, PromiseHandle<any>]> = [];
   private execQueue: Array<'wait'|'running'|'fail'|'done'> = [];
   private resultQueue: any[] = [];
   private runningCount = 0;
@@ -31,7 +37,7 @@ export class Concurrent {
   private onAllDone ?: OnAllDone;
   private supressError: boolean = false;
   private preserveOrder: boolean = false;
-  private idleHandlers: PromiseHandle[] = [];
+  private idleHandlers: Array<PromiseHandle<ProgressStatus>> = [];
 
   constructor(limit: number, options?: Options) {
     this.onErrorOccur = options && options.onErrorOccur || 'skip';
@@ -40,12 +46,12 @@ export class Concurrent {
   }
 
   go(fn: Func) {
-    const [promise, handle] = createPromiseHandle();
-    this.waitingQueue.push([fn, this.total, handle]);
+    const p = usePromise();
+    this.waitingQueue.push([fn, this.total, usePromise()]);
     this.execQueue[this.total] = 'wait';
     this.total ++;
     this.next();
-    return promise;
+    return p.wait();
   }
 
   one(callback: OnOneDone) {
@@ -66,9 +72,9 @@ export class Concurrent {
         success: this.success, fail: this.fail, total: this.total
       });
     }
-    const [promise, handler] = createPromiseHandle();
-    this.idleHandlers.push(handler);
-    return promise;
+    const p = usePromise<ProgressStatus>();
+    this.idleHandlers.push(p);
+    return p.wait();
   }
 
   async forEach(list: IteratorOrList, fn: (n: any) => void | Promise<void>) {
@@ -117,7 +123,7 @@ export class Concurrent {
     }
   }
 
-  private async call(fn: Func, curr: number, promise: PromiseHandle) {
+  private async call(fn: Func, curr: number, promise: PromiseHandle<ProgressStatus>) {
     if (this.halt) {
       return;
     }

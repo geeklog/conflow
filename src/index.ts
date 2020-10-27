@@ -1,5 +1,6 @@
 import { SimpleAyncFunc, AnyFunc } from './types';
 
+export * from './types';
 export * from './concurrent';
 export * from './sequential';
 export * from './sleep';
